@@ -5,16 +5,31 @@ class Message{
     private $id;
     private $texte;
     private $dateMessage;
-    private $idUtil;
+    private $pseudo;
     private $idSalon;
 
     function __construct($id, $texte, $dateMessage, $pseudo, $idSalon){
         $this->id = $id;
         $this->texte=$texte;
         $this->dateMessage = $dateMessage;
+        $this->pseudo = $pseudo;
         $this->idSalon = $idSalon;
     }
 
+    public function getMessage(){
+        return $this->texte;
+    }
+   
+    public function getPseudo(){
+        return $this->pseudo;
+    }
+    public function getDateMessage(){
+        return $this->dateMessage;
+    }
+   
+   
+   
+   
     public static function envoyerMessage($texte, $idUtil, $idSalon){
         $infos = [
             'texte'=>$texte,
@@ -35,15 +50,15 @@ class Message{
         $info = [
             'idSalon'=>$idSalon
         ];
+
         $listMessageServeur = array();
         $data = requetePost('listeMessageServeur', $info);
 
         if($data['data']['success'] == true){
-            for($i = 0; $i<count($data['data']['Message']); $i++){
-                $listeMessageServer[] = new Message($data['data']['Message'][$i]['id'], $data['data']['Message'][$i]['message'], $data['data']['Message'][$i]['dateMessage'], $data['data']['Message'][$i]['pseudo'], $idSalon);
-            }
-            var_dump($listMessageServeur);
-            return $listeMessageServer;
+            
+            
+            return $data['data']['Message'];
+
         }else if($data['data']['success'] == false){
             return $data['data']['message'];
         }else{
@@ -52,9 +67,7 @@ class Message{
         
     }
 
-    public function getMessage(){
-        return $this->texte;
-    }
+    
 }
 
 

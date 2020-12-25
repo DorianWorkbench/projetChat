@@ -19,23 +19,24 @@
 <body>
     <h1>Bienvenue <?php echo $utilisateurPseudo?></h1>
 
-    <h2>Voici vos différents serveurs : </h2>
+    <h2>Voici vos différents salons : </h2>
 
     <?php
         $listeSalon = listerSalonUtilisateur($utilisateurId);
         if(gettype($listeSalon) == "string"){
             echo $listeSalon;
         }else{
-  ?>          <form action="accueilUtilisateur.php" method="post"><?php
-            for ($i=0; $i<count($listeSalon);$i++){
-?>              <button type="submit" name= "btSalon" value =<?php echo $listeSalon[$i]->getNomSalon();?> > 
-                <?php echo $listeSalon[$i]->getNomSalon(); ?> </button>
-<?php   
+          echo "<form action=\"accueilUtilisateur.php\" method=\"post\">";
 
+
+            for ($i=0; $i<count($listeSalon);$i++){
+                echo "<button type = \"submit\" name = \"idSalon\" value = ".$listeSalon[$i]->getId()."> ".$listeSalon[$i]->getNomSalon()."</button>";
             }
-    ?>        </form><?php
+       
+               echo "</form>";
+
         }
-    ?>
+?>
     <h2>Vous n'avez pas rejoint/créé de serveur ? </h2>
     <form action="accueilUtilisateur" method="post">
         <input type="text" name="nomSalonRejoindre">
@@ -51,8 +52,8 @@
 </html>
 
 <?php
-    if(isset($_POST['btSalon'])){
-        $_SESSION['nomSalon']= $_POST['btSalon'];
+    if(isset($_POST['idSalon'])){
+        $_SESSION['idSalon']= $_POST['idSalon'];
         header('Location: tchatRoom');
     }
 

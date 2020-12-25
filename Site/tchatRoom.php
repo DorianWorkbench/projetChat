@@ -1,7 +1,9 @@
 <?php
     session_start();
 
-    $nomSalon = $_SESSION['nomSalon'];
+    $idSalon = $_SESSION['idSalon'];
+    $pseudoUtilisateur = $_SESSION['utilisateurPseudo'];
+    include('controller/CMessage.php');
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -13,10 +15,11 @@
 
 </head>
 <body>
-    <h1>Bienvenue sur le salon <?php echo $nomSalon; ?></h1>
+    <h1>Bienvenue sur le salon</h1>
     <ul id="messages"></ul>
     <input type="text" id="myMessage">
     <button id=sendButton>Send</button>
+
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -24,16 +27,39 @@
     <script src="https://cdn.socket.io/socket.io-3.0.1.min.js"></script>
     <script>
         $(document).ready(function(){
+
+            async function chargementHistorique(){
+                var message = await <?php echo json_encode(listerMessageServeur($idSalon),JSON_UNESCAPED_UNICODE) ?>;
+                //console.log(typeof(message));
+                if(typeof(message)==="string"){
+                    $("#messages").append('<li>'+message+'</li>');
+                }else{
+                    for (let i = 0; i < message.length; i++) {
+                    $("#messages").append('<li>'+message[i]['pseudo']+' : '+message[i]['message']+' à '+message[i]['dateMessage']+'</li>');
+                } 
+                }
+                
+            }
+            
+
+            var idSalon = <?php echo json_encode($idSalon); ?>;
+            var nomUtilisateur = <?php echo json_encode($pseudoUtilisateur); ?>;
             var socket = io.connect('http://localhost:9000');
+            
+            //Sur l'action connect du serveur, une fois executé j'effectue l'action login du même serv.
             socket.on('connect', function(){
-                console.log("connect");
-                socket.send("User connected");
+                chargementHistorique();
+                socket.emit('join', {'data':{'username': nomUtilisateur, 'roomId': idSalon}});
             });
+
             socket.on('message', function(msg){
                 $("#messages").append('<li>'+msg+'</li>');
             });
+
             $('#sendButton').on('click',function(){
-                socket.send($('#myMessage').val());
+                var idSalon = <?php echo json_encode($idSalon); ?>;
+                var idUtil = <?php echo json_encode($_SESSION['utilisateurId']);?>;
+                socket.emit('message', {'texte': $('#myMessage').val(), 'idUtil': idUtil, 'idSalon':idSalon});
                 $('#myMessage').val('');
             });
         })

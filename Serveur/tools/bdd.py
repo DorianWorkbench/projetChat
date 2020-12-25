@@ -89,14 +89,22 @@ def addMessage(texte, idUtil, idSalon):
 
         co.commit()
         co.close()
+        cnx = connexionBdd().cursor()
 
+        strSql = "SELECT pseudo FROM Utilisateur WHERE id = "+str(idUtil)
+
+        cnx.execute(strSql)
+
+        raw = cnx.fetchone()
+
+        print(raw[0])
         print("message envoyé")
 
-        return True
+        return json.loads(json.dumps({'data':{'sucess': True,'Message':{'texte': texte, 'dateMessage': str(date), 'pseudo': raw[0]}}}))
 
     except:
         return False
-
+addMessage("test", 1, 1)
 #Serveur
 
 def creationSalon(nomSalon, idUtil):
@@ -263,5 +271,3 @@ def listeMessageSalon(idSalon):
             return json.loads(json.dumps({'data':{'success': False, 'message' : "Aucun message"}}))
     except:
        print("Erreur")
-
-listeMessageSalon(1)

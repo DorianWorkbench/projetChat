@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO, send, join_room, leave_room, emit
 from flask_cors import CORS
 
 from controller import CUtilisateur, CMessage, CSalon
@@ -8,14 +8,42 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins = '*')
 
-@app.route('/', methods=['GET'])
-def home():
-    return jsonify(accueil = "Connected")
 
 @socketio.on('message')
 def handleMessage(msg):
-    print('Message: '+msg)
-    send(msg, broadcast=True)
+    #texte, idUtil, idSalon
+    message = CMessage.envoieMessageUtil(msg['texte'], msg['idUtil'], msg['idSalon'])['data']['Message']
+    send(message['pseudo']+" : "+message['texte']+" à "+message['dateMessage'], room=msg['idSalon'])
+
+
+
+#Attention, ne pas mettre l'affichage de tous les salons dans la connexion.
+@socketio.on('connect')
+def connexion():
+    #Création d'évènement sur le socket s'effectuant au démarrage de la tchat room.
+    @socketio.on('join')
+    def on_join(data):
+        username = data['data']['username']
+        room = data['data']['roomId']
+        join_room(room)
+        send(username + " est entré dans le salon à l'id : "+str(room), room = room)
+
+    # PAS BON, à voir si je peux l'envoyer sur chaque utilisateur et non pour tout le monde
+    """@socketio.on('login')
+    def test_login(data):
+        if CSalon.listeMessageSalon(data['idSalon'])['data']['success'] == False:
+            send("Aucun message n'a été envoyé", broadcast=True)
+        else :
+            listeMessage = CSalon.listeMessageSalon(data['idSalon'])['data']['Message']
+            print(listeMessage)
+            for message in listeMessage:
+                send(message['pseudo']+" : "+message['message']+" à "+message['dateMessage'], broadcast=True)
+"""
+
+
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify(accueil = "Connected")
 
 #Utilisateur
 #Fait
@@ -34,9 +62,9 @@ def inscription():
 #Message
 #Fait
 #Fait client
-@app.route('/messageEnvoie', methods=['POST'])
-def envoie():
-    return CMessage.envoieMessageUtil(request)
+#@app.route('/messageEnvoie', methods=['POST'])
+#def envoie():
+ #   return CMessage.envoieMessageUtil(request)
 
 #Salon
 #Fait

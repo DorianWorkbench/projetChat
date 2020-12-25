@@ -2,15 +2,12 @@ from flask import jsonify
 
 from modele.Message import Message
 
-def envoieMessageUtil(request):
+def envoieMessageUtil(texte, idUtil, idSalon):
     try:
-        texte = request.form.get('texte')
-        idUtil = request.form.get('idUtil')
-        idSalon = request.form.get('idSalon')
+        #texte = request.form.get('texte')
+        #idUtil = request.form.get('idUtil')
+        #idSalon = request.form.get('idSalon')
 
-        Message.envoieMessage(texte, idUtil, idSalon)
-
-        return jsonify({'data':{'Message':{'success':True, 'message':"Message envoyé"}}})
-
+        return Message.envoieMessage(texte, idUtil, idSalon)
     except:
         return jsonify({'data':{'error':True}})
